@@ -22,7 +22,7 @@
 
 ```bash
 # 1. Clonar repositorio
-git clone https://github.com/tuusuario/DDOS-MASTER-TERMUX.git
+git clone https://github.com/Diego-kaly/DDOS-MASTER-TERMUX.git
 cd DDOS-MASTER-TERMUX
 
 # 2. Dar permisos
