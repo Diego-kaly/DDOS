@@ -1,0 +1,337 @@
+================================================================================
+                    REQUISITOS COMPLETOS - DDOS-MASTER-TERMUX
+================================================================================
+
+Este archivo contiene TODOS los requisitos necesarios para ejecutar el script
+DDOS-MASTER-TERMUX, tanto en modo ROOT como en modo NO-ROOT.
+
+================================================================================
+1. REQUISITOS DE HARDWARE (MÍNIMOS)
+================================================================================
+
+✓ Procesador: ARMv7 (32-bit) o superior
+✓ RAM: 1 GB mínimo (2 GB recomendado)
+✓ Almacenamiento: 500 MB libres
+✓ Batería: Cargador conectado o mínimo 50%
+✓ WiFi: 2.4 GHz (conectado a la red objetivo)
+
+================================================================================
+2. REQUISITOS DE SOFTWARE (ANDROID)
+================================================================================
+
+✓ Android 7.0 (Nougat) o superior
+✓ Termux v0.118.0+ (instalado desde F-Droid, NO desde Play Store)
+✓ Permisos de almacenamiento concedidos
+✓ Depuración USB (opcional)
+
+================================================================================
+3. REQUISITOS PARA MODO ROOT (OPCIONAL - MÁS POTENCIA)
+================================================================================
+
+✓ Dispositivo rooteado (Magisk / SuperSU)
+✓ Permisos root concedidos a Termux
+✓ Comando 'tsu' funcionando
+
+================================================================================
+4. PAQUETES TERMUX OBLIGATORIOS (PARA AMBOS MODOS)
+================================================================================
+
+Ejecutar en Termux:
+-------------------------------------------------------------------------------
+pkg update -y && pkg upgrade -y
+pkg install -y python3 git nmap curl wget openssl openssh
+-------------------------------------------------------------------------------
+
+================================================================================
+5. PAQUETES TERMUX PARA MODO ROOT (OPCIONAL)
+================================================================================
+
+Ejecutar en Termux (si tienes root):
+-------------------------------------------------------------------------------
+pkg install -y root-repo tsu hping3 arp-scan tcpdump dsniff mdk3 aircrack-ng
+pkg install -y net-tools arping iw
+-------------------------------------------------------------------------------
+
+================================================================================
+6. LIBRERÍAS PYTHON OBLIGATORIAS (PARA AMBOS MODOS)
+================================================================================
+
+Ejecutar en Termux:
+-------------------------------------------------------------------------------
+pip install --upgrade pip
+pip install requests colorama netifaces urllib3 beautifulsoup4 fake-useragent
+pip install psutil python-dateutil
+-------------------------------------------------------------------------------
+
+================================================================================
+7. LIBRERÍAS PYTHON PARA MODO ROOT (OPCIONAL)
+================================================================================
+
+Ejecutar en Termux (si tienes root):
+-------------------------------------------------------------------------------
+pip install scapy cryptography paramiko netaddr pycrypto
+-------------------------------------------------------------------------------
+
+================================================================================
+8. PERMISOS NECESARIOS
+================================================================================
+
+Ejecutar en Termux:
+-------------------------------------------------------------------------------
+# Permisos de almacenamiento
+termux-setup-storage
+
+# Permisos de ejecución para scripts
+chmod +x ddos_master.sh install.sh requirements_check.py
+
+# Verificar permisos
+ls -la
+-------------------------------------------------------------------------------
+
+================================================================================
+9. VERIFICACIÓN DE REQUISITOS (SCRIPT AUTOMÁTICO)
+================================================================================
+
+Crear y ejecutar este script para verificar TODO:
+-------------------------------------------------------------------------------
+cat > check_requirements.py << 'EOF'
+#!/usr/bin/env python3
+import subprocess
+import sys
+import os
+
+ROJO = '\033[0;31m'
+VERDE = '\033[0;32m'
+AMARILLO = '\033[1;33m'
+AZUL = '\033[0;34m'
+NC = '\033[0m'
+
+def verificar_python():
+    version = sys.version_info
+    if version.major >= 3 and version.minor >= 7:
+        print(f"{VERDE}✅ Python {version.major}.{version.minor}.{version.micro}{NC}")
+        return True
+    else:
+        print(f"{ROJO}❌ Python {version.major}.{version.minor} - Necesitas 3.7+{NC}")
+        return False
+
+def verificar_pip():
+    try:
+        result = subprocess.run(['pip', '--version'], capture_output=True, text=True)
+        print(f"{VERDE}✅ {result.stdout.split()[1]}{NC}")
+        return True
+    except:
+        print(f"{ROJO}❌ Pip no instalado{NC}")
+        return False
+
+def verificar_root():
+    try:
+        result = subprocess.run(['whoami'], capture_output=True, text=True)
+        if result.stdout.strip() == 'root':
+            print(f"{VERDE}✅ Root disponible (modo avanzado){NC}")
+            return True
+        else:
+            print(f"{AMARILLO}⚠️ Sin root (modo limitado){NC}")
+            return False
+    except:
+        print(f"{AMARILLO}⚠️ No se pudo verificar root{NC}")
+        return False
+
+def verificar_libreria(lib):
+    try:
+        __import__(lib)
+        print(f"{VERDE}✅ {lib}{NC}")
+        return True
+    except ImportError:
+        print(f"{ROJO}❌ {lib}{NC}")
+        return False
+
+def main():
+    print(f"\n{AZUL}{'='*50}{NC}")
+    print(f"{AZUL}   VERIFICADOR DE REQUISITOS{NC}")
+    print(f"{AZUL}{'='*50}{NC}\n")
+    
+    print(f"{AZUL}[1] Python:{NC}")
+    verificar_python()
+    print()
+    
+    print(f"{AZUL}[2] Pip:{NC}")
+    verificar_pip()
+    print()
+    
+    print(f"{AZUL}[3] Root:{NC}")
+    verificar_root()
+    print()
+    
+    print(f"{AZUL}[4] Librerías Python:{NC}")
+    librerias = ['requests', 'colorama', 'netifaces', 'urllib3', 'bs4', 'psutil']
+    for lib in librerias:
+        verificar_libreria(lib)
+    
+    print(f"\n{AZUL}{'='*50}{NC}")
+    print(f"{VERDE}✅ Verificación completada{NC}")
+    print(f"{AZUL}{'='*50}{NC}\n")
+
+if __name__ == "__main__":
+    main()
+EOF
+
+python3 check_requirements.py
+-------------------------------------------------------------------------------
+
+================================================================================
+10. INSTALACIÓN AUTOMÁTICA (SCRIPT COMPLETO)
+================================================================================
+
+Crear y ejecutar este script para instalar TODO automáticamente:
+-------------------------------------------------------------------------------
+cat > instalar_todo.sh << 'EOF'
+#!/bin/bash
+echo "🔥 INSTALANDO DDOS-MASTER-TERMUX 🔥"
+echo "=================================="
+
+# Actualizar
+pkg update -y && pkg upgrade -y
+
+# Paquetes básicos
+pkg install -y python3 git nmap curl wget openssl openssh
+
+# Librerías Python
+pip install --upgrade pip
+pip install requests colorama netifaces urllib3 beautifulsoup4 fake-useragent psutil
+
+# Verificar root
+if command -v tsu &> /dev/null; then
+    echo "✅ Root detectado - Instalando paquetes extra"
+    pkg install -y root-repo hping3 arp-scan tcpdump dsniff
+    pip install scapy cryptography
+fi
+
+# Permisos
+termux-setup-storage
+
+echo ""
+echo "✅ INSTALACIÓN COMPLETA"
+echo "Ejecuta: ./ddos_master.sh"
+EOF
+
+chmod +x instalar_todo.sh
+./instalar_todo.sh
+-------------------------------------------------------------------------------
+
+================================================================================
+11. VERIFICACIÓN MANUAL (COMANDOS RÁPIDOS)
+================================================================================
+
+# Verificar Python
+python3 --version
+
+# Verificar pip
+pip --version
+
+# Verificar paquetes Termux
+pkg list-installed | grep -E "python|git|nmap"
+
+# Verificar librerías Python
+pip list | grep -E "requests|colorama|scapy"
+
+# Verificar root (opcional)
+whoami
+
+================================================================================
+12. SOLUCIÓN DE PROBLEMAS COMUNES
+================================================================================
+
+PROBLEMA: "Permission denied"
+SOLUCIÓN: chmod +x nombre_del_script.sh
+
+PROBLEMA: "command not found"
+SOLUCIÓN: pkg install nombre_del_paquete
+
+PROBLEMA: "ModuleNotFoundError"
+SOLUCIÓN: pip install nombre_de_libreria
+
+PROBLEMA: "Termux no tiene permisos"
+SOLUCIÓN: termux-setup-storage
+
+PROBLEMA: "No se puede instalar desde Play Store"
+SOLUCIÓN: Instalar Termux desde F-Droid (https://f-droid.org)
+
+================================================================================
+13. COMPATIBILIDAD POR DISPOSITIVO
+================================================================================
+
+| Marca        | Modelos Compatibles           | Root Necesario |
+|--------------|-------------------------------|----------------|
+| Samsung      | Galaxy S8, S9, S10, S20, S21  | No (opcional)  |
+| Xiaomi       | Redmi Note 7-11, Mi 9-11      | No (opcional)  |
+| Huawei       | P20, P30, Mate 20,30          | No (opcional)  |
+| OnePlus      | 6,7,8,9                       | No (opcional)  |
+| Google       | Pixel 3,4,5,6                 | No (opcional)  |
+| Motorola     | G7, G8, G9, Edge              | No (opcional)  |
+| LG           | G7, G8, V40, V50              | No (opcional)  |
+| Sony         | Xperia 1,5,10                 | No (opcional)  |
+| Nokia        | 6.1, 7.1, 8.1                 | No (opcional)  |
+| Otros        | Android 7.0 o superior        | No (opcional)  |
+
+================================================================================
+14. REQUISITOS DE RED
+================================================================================
+
+✓ Red objetivo: 192.168.1.0/24 (puede variar)
+✓ Router: 192.168.1.1 (por defecto)
+✓ WiFi conectado: OBLIGATORIO
+✓ Internet: NO necesario (ataque local)
+✓ IP estática: Opcional
+
+================================================================================
+15. REQUISITOS DE ENERGÍA
+================================================================================
+
+✓ Batería: Mínimo 50% (recomendado cargador conectado)
+✓ Sin limitación de energía en segundo plano
+✓ Modo de ahorro de batería DESACTIVADO
+
+================================================================================
+16. ESPACIO EN DISCO REQUERIDO
+================================================================================
+
+✓ Termux base: ~200 MB
+✓ Paquetes adicionales: ~150 MB
+✓ Librerías Python: ~100 MB
+✓ TOTAL RECOMENDADO: 500 MB libres
+
+================================================================================
+17. VERSIÓN MÍNIMA DE ANDROID POR MARCA
+================================================================================
+
+| Marca        | Android Mínimo |
+|--------------|----------------|
+| Samsung      | Android 7.0    |
+| Xiaomi       | Android 7.0    |
+| Huawei       | Android 7.0    |
+| OnePlus      | Android 7.0    |
+| Google       | Android 7.0    |
+| Motorola     | Android 7.0    |
+| LG           | Android 7.0    |
+| Sony         | Android 7.0    |
+
+================================================================================
+18. COMANDO RÁPIDO - INSTALACIÓN EN UNA LÍNEA
+================================================================================
+
+Copia y pega ESTO en Termux:
+
+pkg update -y && pkg upgrade -y && pkg install -y python3 git nmap curl wget && pip install requests colorama netifaces urllib3 beautifulsoup4 fake-useragent psutil && termux-setup-storage && echo "✅ LISTO"
+
+================================================================================
+19. COMANDO RÁPIDO - VERIFICACIÓN EN UNA LÍNEA
+================================================================================
+
+Copia y pega ESTO en Termux:
+
+python3 -c "import sys, requests, colorama, netifaces; print(f'Python: {sys.version[:10]} | Librerías: OK')" && echo "✅ TODO FUNCIONA"
+
+================================================================================
+20. FIN DEL ARCHIVO - TODOS LOS REQUISITOS ESTÁN AQUÍ
+================================================================================
