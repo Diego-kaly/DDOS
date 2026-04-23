@@ -1,0 +1,50 @@
+
+---
+
+## 📄 Archivo 2: `install.sh`
+
+```bash
+#!/bin/bash
+# =============================================================================
+# INSTALADOR DE DDOS-MASTER-TERMUX
+# =============================================================================
+
+clear
+echo "🔥 INSTALANDO DDOS-MASTER-TERMUX 🔥"
+echo "=================================="
+echo ""
+
+# Verificar Termux
+if [ ! -d "$HOME/.termux" ]; then
+    echo "❌ Esto no parece ser Termux. Instala Termux desde F-Droid"
+    exit 1
+fi
+
+# Dar permisos de almacenamiento
+echo "[1/5] Dando permisos de almacenamiento..."
+termux-setup-storage 2>/dev/null || echo "   ⚠️ Omite si ya tienes permisos"
+
+# Actualizar paquetes
+echo "[2/5] Actualizando Termux..."
+pkg update -y && pkg upgrade -y
+
+# Instalar dependencias básicas
+echo "[3/5] Instalando dependencias básicas..."
+pkg install -y git python3 nmap curl wget
+
+# Instalar dependencias extra (sin root)
+echo "[4/5] Instalando dependencias extra..."
+pip install requests colorama scapy
+
+# Verificar root
+echo "[5/5] Verificando permisos..."
+if command -v tsu &> /dev/null; then
+    echo "   ✅ tsu instalado (puedes usar root)"
+else
+    echo "   ⚠️ tsu no instalado. Para root: pkg install tsu"
+fi
+
+echo ""
+echo "✅ INSTALACIÓN COMPLETA"
+echo ""
+echo "Para ejecutar: ./ddos_master.sh"
